@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cryptoapp/model/Coin.dart';
@@ -5,6 +6,7 @@ import 'package:cryptoapp/widgets/coin_item_tile.dart';
 import 'package:cryptoapp/widgets/headings_row.dart';
 import 'package:cryptoapp/widgets/top_search_bar_area.dart';
 import 'package:cryptoapp/widgets/vsCurrency_row.dart';
+import 'package:cryptoapp/data/coin_data.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,32 +15,35 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
-
-
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> _vsCurrencies = ["USDT", "BUSD", "BNB", "BTC", "ALTS"];
   int _selectedVSCurrencyIndex = 0;
 
-  List<Coin> coins = [];
+  Stream<List<Coin>> getPostApi() async* {
+    while(true) {
+      coins.clear();
+      print("I am running");
+      final response = await http.get(
+        Uri.parse(
+            "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en"),
+      );
 
-  Future<List<Coin>> getPostApi() async {
-    final response = await http.get(
-      Uri.parse(
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en"),
-    );
+      var data = jsonDecode(response.body);
 
-    var data = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      for (Map i in data) {
-        coins.add(Coin.fromJson(i));
+      if (response.statusCode == 200) {
+        for (Map i in data) {
+          coins.add(Coin.fromJson(i));
+        }
+        yield coins;
+      } else {
+        yield coins;
       }
-      return coins;
-    } else {
-      return coins;
+
+      await Future.delayed(const Duration(seconds: 20));
     }
+
   }
 
   Widget _buildVSCurrencyIcons(int index) {
@@ -103,12 +108,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           buildVSCurrencyIcons: _buildVSCurrencyIcons),
                       const HeadingsRow(),
                       Expanded(
-                        child: FutureBuilder(
-                        future: getPostApi()
-                        ,builder: (context, snapshot) {
-                          return ListView.builder( itemCount: coins.length,itemBuilder: (context, index) => CoinItemTile(coin: coins[index]),);
-                        },),
-                      )
+                        child: StreamBuilder(
+                          stream: getPostApi(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return const Center(
+                                child: Text("Error"),
+                              );
+                            }
+
+                            return ListView.builder(
+                              itemCount: coins.length,
+                              itemBuilder: (context, index) =>
+                                  CoinItemTile(coin: coins[index]),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -40,7 +40,7 @@ class CoinItemTile extends StatelessWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Container(
         // height: MediaQuery.of(context).size.height * 0.09,
         // color: Colors.black87,
