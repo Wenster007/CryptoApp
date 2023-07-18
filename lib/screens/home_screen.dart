@@ -23,7 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Stream<List<Coin>> getPostApi() async* {
     while(true) {
+      previousCoins = coins;
       coins.clear();
+
       print("I am running");
       final response = await http.get(
         Uri.parse(
@@ -112,8 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           stream: getPostApi(),
                           builder: (context, snapshot) {
                             if (snapshot.hasError) {
-                              return const Center(
-                                child: Text("Error"),
+                              return Center(
+                                child: Text(snapshot.error.toString()),
                               );
                             }
 

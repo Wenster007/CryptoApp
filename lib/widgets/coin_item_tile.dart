@@ -1,3 +1,4 @@
+import 'package:cryptoapp/data/coin_data.dart';
 import 'package:cryptoapp/model/Coin.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ class CoinItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     String formatNumber(num value) {
       String formattedValue = value.toStringAsFixed(4);
       List<String> parts = formattedValue.split('.');
@@ -42,8 +44,6 @@ class CoinItemTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Container(
-        // height: MediaQuery.of(context).size.height * 0.09,
-        // color: Colors.black87,
         child: Column(
           children: [
             Row(
